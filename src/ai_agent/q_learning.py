@@ -55,6 +55,7 @@ def train(agent, env, episodes=50, max_steps=200):
 def test(agent, env, max_steps=200):
     state = env.reset()
     env.render()
+    print(f"---------")
     for step in range(max_steps):
         agent.ensure_state(state)
         action = int(np.argmax(agent.q_table[state]))
@@ -64,18 +65,35 @@ def test(agent, env, max_steps=200):
         if done:
             print(f"Sortie atteinte en {step+1} étapes avec reward {reward}")
             break
-
 if __name__ == "__main__":
-    # Exemple de labyrinthe 20x20 (tu peux mettre le tien)
-    maze = np.zeros((20, 20), dtype=int)
-    maze[5:15, 10] = 1  # mur vertical
-    maze[10, 5:15] = 1  # mur horizontal
+    maze = np.array([
+        [0,0,0,0,1,1,1,0,0,0,1,0,0,0,1,0,0,0,0,0],
+        [1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,0],
+        [0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0],
+        [0,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,0],
+        [0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0],
+        [0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0],
+        [0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0],
+        [0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1],
+        [0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+        [0,1,0,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0],
+        [0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0],
+        [1,1,1,1,0,1,0,1,1,0,1,1,1,1,1,1,1,0,1,0],
+        [0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0],
+        [0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,1,1,0],
+        [0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0],
+        [0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+    ], dtype=int)
 
     env = MazeEnv(maze, start=(0, 0), goal=(19, 19))
     agent = QLearningAgent(env)
 
     print("=== Entraînement ===")
-    train(agent, env, episodes=10000, max_steps=500)
+    train(agent, env, episodes=10000, max_steps=44)
 
     print("\n=== Test ===")
     test(agent, env)
