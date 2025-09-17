@@ -95,7 +95,7 @@ if __name__ == "__main__":
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ])
-    env = MazeEnv(maze, start=(0, 0), goal=(4, 4))
+    env = MazeEnv(maze, start=(0, 1), goal=(4, 4))
     env.render()
     env.step(1)  # down
     print("\nAfter one step down:")
