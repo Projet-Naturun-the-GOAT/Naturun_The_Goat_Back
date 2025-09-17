@@ -39,6 +39,24 @@ def test_move_down(setup_maze):
     state, reward, done, info = env.step(1)  # action = 1 (down)
     assert state == (1, 0), "L'agent devrait descendre d'une case."
     assert reward == -0.1, "Le mouvement dans une case valide mais sans objectif devrait donner une petite pénalité."
+    
+def test_move_left(setup_maze):
+    """Test du mouvement vers la gauche."""
+    env = setup_maze
+    env.start = (2, 1)  # Positionner l'agent en (2,1) pour tester le mouvement vers la gauche
+    env.reset()
+    state, reward, done, info = env.step(2)  # action = 2 (left)
+    assert state == (2, 0), "L'agent devrait se déplacer vers la gauche."
+    assert reward == -0.1, "Le mouvement dans une case valide mais sans objectif devrait donner une petite pénalité."
+
+def test_move_right(setup_maze):
+    """Test du mouvement vers la droite."""
+    env = setup_maze
+    env.start = (2, 0)  # Positionner l'agent en (2,0) pour tester le mouvement vers la droite
+    env.reset()
+    state, reward, done, info = env.step(3)  # action = 3 (right)
+    assert state == (2, 1), "L'agent devrait se déplacer vers la droite."
+    assert reward == -0.1, "Le mouvement dans une case valide mais sans objectif devrait donner une petite pénalité."
 
 def test_hit_wall(setup_maze):
     """Test des mouvements dans un mur."""
@@ -74,3 +92,12 @@ def test_step_invalid_move(setup_maze):
     state, reward, done, info = env.step(0)  # up (mouvement invalide vers un mur)
     assert state == old_state, "L'agent ne devrait pas pouvoir se déplacer dans une zone bloquée."
     assert reward == -0.5, "L'agent devrait être pénalisé s'il essaie de se déplacer dans un mur."
+    
+def test_render(setup_maze):
+    """Test de la méthode render."""
+    env = setup_maze
+    env.reset()
+    try:
+        env.render()  # Juste vérifier que cela ne lève pas d'exception
+    except Exception as e:
+        pytest.fail(f"La méthode render a levé une exception: {e}")
