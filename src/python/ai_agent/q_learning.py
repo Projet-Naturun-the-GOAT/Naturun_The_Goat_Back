@@ -1,7 +1,7 @@
 # src/ai_agent/q_learning.py
 import numpy as np
 import random
-from src.environment.maze import MazeEnv
+from src.python.environment.maze import MazeEnv
 
 class QLearningAgent:
     def __init__(self, env, alpha=0.1, gamma=0.9, epsilon=0.2):
