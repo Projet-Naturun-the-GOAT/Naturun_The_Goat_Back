@@ -62,9 +62,12 @@ class MazeEnv:
         maze_render[maze_render == '0'] = '.'
         maze_render[maze_render == '1'] = '#'
         r, c = self.state
-        maze_render[r, c] = 'A'
         gr, gc = self.goal
-        maze_render[gr, gc] = 'G'
+        if (r, c) == (gr, gc):
+            maze_render[r, c] = '*'
+        else:
+            maze_render[r, c] = 'A'
+            maze_render[gr, gc] = 'G'
         print('\n'.join(' '.join(row) for row in maze_render))
 
 # Example usage:
