@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class MazeEnv:
     def __init__(self, maze, start, goal):
         """
@@ -46,11 +47,11 @@ class MazeEnv:
 
         done = next_state == self.goal
         if done:
-            reward = 10.0
+            reward = 20.0
         elif next_state == old_state:
-            reward = -0.5  # penalty for hitting wall
+            reward = -.6  # penalty for hitting wall
         else:
-            reward = -0.1  # penalty for other valid moves
+            reward = -.2  # penalty for other valid moves
 
         info = {}
         self.n_steps += 1
@@ -70,13 +71,14 @@ class MazeEnv:
             maze_render[gr, gc] = 'G'
         print('\n'.join(' '.join(row) for row in maze_render))
 
+
 # Example usage:
 if __name__ == "__main__":
     maze = np.array([
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
     [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1],
+    [1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
