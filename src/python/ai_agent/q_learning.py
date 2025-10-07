@@ -79,6 +79,7 @@ def train(agent, env, episodes=50, max_steps=200):
             total_reward += reward
             steps += 1
 
+        #agent.epsilon = max(0.05, 1.0 - ep/5000)  # decay epsilon
         if ep % 100 == 0 or ep == episodes - 1:
             print(f"Episode {ep}, total_reward={total_reward}, steps={steps}")
 
@@ -125,16 +126,16 @@ if __name__ == "__main__":
 
     random.seed(42)   # fixe la seed du module random
     np.random.seed(42)  # fixe la seed de numpy
-    maze = generate_maze(51, 51)
+    maze = generate_maze(49, 49)
 
-    env = MazeEnv(maze, start=(1, 1), goal=(49, 49))
+    env = MazeEnv(maze, start=(1, 1), goal=(47, 47))
     agent = QLearningAgent(env)
-    agent.load("q_table.pkl")
+    #agent.load("q_table.pkl")
 
     print("=== Entraînement ===")
-    train(agent, env, episodes=10000, max_steps=2000)
+    train(agent, env, episodes=10000, max_steps=5000)
     
     agent.save("q_table.pkl")
 
     print("\n=== Test ===")
-    test(agent, env)
+    test(agent, env, 5000)

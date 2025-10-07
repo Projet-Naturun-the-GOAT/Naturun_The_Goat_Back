@@ -48,9 +48,9 @@ class MazeEnv:
         if done:
             reward = 10000.0
         elif next_state == old_state:
-            reward = -2.0  # penalty for hitting wall
+            reward = -10.0  # penalty for hitting wall
         else:
-            reward = -0.5  # penalty for other valid moves
+            reward = -1  # penalty for other valid moves
 
         info = {}
         self.n_steps += 1
@@ -69,6 +69,7 @@ class MazeEnv:
             maze_render[r, c] = 'A'
             maze_render[gr, gc] = 'G'
         print('\n'.join(' '.join(row) for row in maze_render))
+        print('\n')
 
 # Example usage:
 if __name__ == "__main__":
