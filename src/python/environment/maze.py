@@ -49,7 +49,7 @@ class MazeEnv:
         if done:
             reward = 20.0
         elif next_state == old_state:
-            reward = -.6  # penalty for hitting wall
+            reward = -.5  # penalty for hitting wall
         else:
             reward = -.2  # penalty for other valid moves
 

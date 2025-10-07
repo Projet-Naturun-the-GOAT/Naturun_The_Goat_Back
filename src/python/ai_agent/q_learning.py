@@ -226,7 +226,6 @@ def generate_maze(width=31, height=31):
     maze = np.ones((height, width), dtype=int)
 
     def carve(r, c):
-        random.seed(42)
         dirs = [(2, 0), (-2, 0), (0, 2), (0, -2)]
         random.shuffle(dirs)
         for dr, dc in dirs:
@@ -238,14 +237,15 @@ def generate_maze(width=31, height=31):
 
     maze[1, 1] = 0
     carve(1, 1)
-    random.seed()  # Réinitialiser le seed global
     return maze
 
 
 if __name__ == "__main__":
     # Générer ou charger un labyrinthe
-    maze = generate_maze(21, 21)  # Plus petit pour un apprentissage plus rapide
-    env = MazeEnv(maze, start=(1, 1), goal=(19, 19))
+    random.seed(42)
+    maze = generate_maze(23, 23)  # Plus petit pour un apprentissage plus rapide
+    random.seed()  # Réinitialiser le seed global
+    env = MazeEnv(maze, start=(1, 1), goal=(21, 21))
 
     model_file = "agent_model.npy"
 
