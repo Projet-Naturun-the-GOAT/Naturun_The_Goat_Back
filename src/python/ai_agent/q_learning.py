@@ -2,8 +2,7 @@
 import numpy as np
 import random
 import os
-from src.python.environment.maze import MazeEnv
-
+from src.python.environment.maze import MazeEnv, generate_maze
 
 class QLearningAgent:
     def __init__(self, env, alpha=0.1, gamma=0.95, epsilon=1.0, epsilon_min=0.01, epsilon_decay=0.9995):
@@ -112,134 +111,114 @@ class QLearningAgent:
             return None, None
         
 
-def train(agent, env, episodes=50, max_steps=200, save_interval=100, model_filename="agent_model.npy"):
-    """Entraînement avec sauvegarde automatique de la mémoire"""
-    
-    # Charger le meilleur reward précédent
-    best_reward = float('-inf')
-    if os.path.exists(model_filename):
-        try:
-            with open(model_filename, "rb") as f:
-                saved_data = np.load(f, allow_pickle=True).item()
-                best_reward = saved_data.get('best_reward', float('-inf'))
-        except:
-            pass
+    def train(self, env, episodes=50, max_steps=200, save_interval=100, model_filename="agent_model.npy"):
+        """Entraînement avec sauvegarde automatique de la mémoire"""
+        
+        # Charger le meilleur reward précédent
+        best_reward = float('-inf')
+        if os.path.exists(model_filename):
+            try:
+                with open(model_filename, "rb") as f:
+                    saved_data = np.load(f, allow_pickle=True).item()
+                    best_reward = saved_data.get('best_reward', float('-inf'))
+            except:
+                pass
 
-    print(f"\n{'='*60}")
-    print(f"🎓 DÉBUT DE L'ENTRAÎNEMENT")
-    print(f"{'='*60}")
-    print(f"Episodes prévus: {episodes}")
-    print(f"Episodes déjà effectués: {agent.episodes_trained}")
-    print(f"Epsilon initial: {agent.epsilon:.4f}")
-    print(f"Meilleur reward actuel: {best_reward}")
-    print(f"{'='*60}\n")
-    
-    for ep in range(episodes):
+        print(f"\n{'='*60}")
+        print(f"🎓 DÉBUT DE L'ENTRAÎNEMENT")
+        print(f"{'='*60}")
+        print(f"Episodes prévus: {episodes}")
+        print(f"Episodes déjà effectués: {self.episodes_trained}")
+        print(f"Epsilon initial: {self.epsilon:.4f}")
+        print(f"Meilleur reward actuel: {best_reward}")
+        print(f"{'='*60}\n")
+        
+        for ep in range(episodes):
+            state = env.reset()
+            done = False
+            total_reward = 0
+            steps = 0
+
+            # EXPLORATION DE L'ÉPISODE
+            while not done and steps < max_steps:
+                action = self.choose_action(state)
+                next_state, reward, done, _ = env.step(action)
+                self.update(state, action, reward, next_state, done)
+                state = next_state
+                total_reward += reward
+                steps += 1
+
+            # MISE À JOUR POST-ÉPISODE
+            self.episodes_trained += 1
+            self.decay_epsilon()  # Réduire l'exploration progressivement
+
+            # Affichage périodique
+            if ep % 10 == 0 or ep == episodes - 1:
+                print(f"Episode {ep:4d}/{episodes} | Reward: {total_reward:7.2f} | Steps: {steps:3d} | Epsilon: {self.epsilon:.4f} | États connus: {len(self.q_table)}")
+
+            # 🔥 SAUVEGARDE SI NOUVEAU RECORD
+            if total_reward > best_reward:
+                best_reward = total_reward
+                print(f"   🎉 NOUVEAU RECORD! {total_reward:.2f} → Sauvegarde automatique")
+                self.save(model_filename, best_reward=best_reward)
+            
+            # 💾 CHECKPOINT PÉRIODIQUE (toutes les N itérations)
+            if (ep + 1) % save_interval == 0:
+                checkpoint_file = f"checkpoints/agent_ep{self.episodes_trained}.npy"
+                self.save(checkpoint_file, best_reward=best_reward)
+        
+        # SAUVEGARDE FINALE
+        print(f"\n{'='*60}")
+        print("💾 Sauvegarde finale...")
+        self.save(model_filename, best_reward=best_reward)
+        print(f"{'='*60}")
+
+    def test(self, env, max_steps=200, render=True):
+        """Test de l'agent (MODE EXPLOITATION PURE)"""
+        # Sauvegarder l'epsilon actuel
+        original_epsilon = self.epsilon
+        self.epsilon = 0.0  # Désactiver l'exploration pour le test
+
         state = env.reset()
-        done = False
         total_reward = 0
         steps = 0
 
-        # EXPLORATION DE L'ÉPISODE
-        while not done and steps < max_steps:
-            action = agent.choose_action(state)
-            next_state, reward, done, _ = env.step(action)
-            agent.update(state, action, reward, next_state, done)
-            state = next_state
-            total_reward += reward
-            steps += 1
-
-        # MISE À JOUR POST-ÉPISODE
-        agent.episodes_trained += 1
-        agent.decay_epsilon()  # Réduire l'exploration progressivement
-
-        # Affichage périodique
-        if ep % 10 == 0 or ep == episodes - 1:
-            print(f"Episode {ep:4d}/{episodes} | Reward: {total_reward:7.2f} | Steps: {steps:3d} | Epsilon: {agent.epsilon:.4f} | États connus: {len(agent.q_table)}")
-        
-        # 🔥 SAUVEGARDE SI NOUVEAU RECORD
-        if total_reward > best_reward:
-            best_reward = total_reward
-            print(f"   🎉 NOUVEAU RECORD! {total_reward:.2f} → Sauvegarde automatique")
-            agent.save(model_filename, best_reward=best_reward)
-        
-        # 💾 CHECKPOINT PÉRIODIQUE (toutes les N itérations)
-        if (ep + 1) % save_interval == 0:
-            checkpoint_file = f"checkpoints/agent_ep{agent.episodes_trained}.npy"
-            agent.save(checkpoint_file, best_reward=best_reward)
-    
-    # SAUVEGARDE FINALE
-    print(f"\n{'='*60}")
-    print("💾 Sauvegarde finale...")
-    agent.save(model_filename, best_reward=best_reward)
-    print(f"{'='*60}")
-
-
-def test(agent, env, max_steps=200, render=True):
-    """Test de l'agent (MODE EXPLOITATION PURE)"""
-    # Sauvegarder l'epsilon actuel
-    original_epsilon = agent.epsilon
-    agent.epsilon = 0.0  # Désactiver l'exploration pour le test
-    
-    state = env.reset()
-    total_reward = 0
-    steps = 0
-    
-    if render:
-        print(f"\n{'='*60}")
-        print("🧪 TEST DE L'AGENT (pas d'exploration)")
-        print(f"{'='*60}")
-        env.render()
-        print("-" * 40)
-    
-    for step in range(max_steps):
-        agent.ensure_state(state)
-        action = int(np.argmax(agent.q_table[state]))  # Toujours la meilleure action
-        next_state, reward, done, _ = env.step(action)
-        
-        total_reward += reward
-        state = next_state
-        steps = step + 1
-        
         if render:
+            print(f"\n{'='*60}")
+            print("🧪 TEST DE L'AGENT (pas d'exploration)")
+            print(f"{'='*60}")
             env.render()
-        
-        if done:
-            if reward > 0:
-                print(f"\n✅ SUCCÈS en {steps} étapes!")
-            else:
-                print(f"\n❌ ÉCHEC après {steps} étapes")
+            print("-" * 40)
+
+        for step in range(max_steps):
+            self.ensure_state(state)
+            action = int(np.argmax(self.q_table[state]))  # Toujours la meilleure action
+            next_state, reward, done, _ = env.step(action)
+
+            total_reward += reward
+            state = next_state
+            steps = step + 1
+
+            if render:
+                env.render()
+
+            if done:
+                if reward > 0:
+                    print(f"\n✅ SUCCÈS en {steps} étapes!")
+                else:
+                    print(f"\n❌ ÉCHEC après {steps} étapes")
+                print(f"   Reward total: {total_reward:.2f}")
+                break
+        else:
+            print(f"\n⏱️  Timeout ({max_steps} étapes max)")
             print(f"   Reward total: {total_reward:.2f}")
-            break
-    else:
-        print(f"\n⏱️  Timeout ({max_steps} étapes max)")
-        print(f"   Reward total: {total_reward:.2f}")
+
+        # Restaurer epsilon
+        self.epsilon = original_epsilon
+
+        return total_reward, steps
     
-    # Restaurer epsilon
-    agent.epsilon = original_epsilon
     
-    return total_reward, steps
-
-
-def generate_maze(width=31, height=31):
-    """Génère un labyrinthe aléatoire avec l'algorithme de backtracking récursif"""
-    maze = np.ones((height, width), dtype=int)
-
-    def carve(r, c):
-        dirs = [(2, 0), (-2, 0), (0, 2), (0, -2)]
-        random.shuffle(dirs)
-        for dr, dc in dirs:
-            nr, nc = r + dr, c + dc
-            if 1 <= nr < height-1 and 1 <= nc < width-1 and maze[nr, nc] == 1:
-                maze[nr-dr//2, nc-dc//2] = 0
-                maze[nr, nc] = 0
-                carve(nr, nc)
-
-    maze[1, 1] = 0
-    carve(1, 1)
-    return maze
-
-
 if __name__ == "__main__":
     # Générer ou charger un labyrinthe
     random.seed(42)
@@ -265,7 +244,7 @@ if __name__ == "__main__":
             # CONTINUER L'APPRENTISSAGE
             nb_episodes = int(input("Nombre d'épisodes supplémentaires: "))
             loaded_agent.reset_exploration(epsilon=0.3)  # Réactiver un peu l'exploration
-            train(loaded_agent, env, episodes=nb_episodes, max_steps=500, model_filename=model_file)
+            loaded_agent.train(env, episodes=nb_episodes, max_steps=500, model_filename=model_file)
             agent = loaded_agent
 
         elif choice == "2":
@@ -278,7 +257,7 @@ if __name__ == "__main__":
             confirm = input("Confirmer (oui/non): ").strip().lower()
             if confirm == "oui":
                 agent = QLearningAgent(env)
-                train(agent, env, episodes=5000, max_steps=500, model_filename=model_file)
+                agent.train(env, episodes=5000, max_steps=500, model_filename=model_file)
             else:
                 print("Annulé.")
                 exit()
@@ -286,10 +265,10 @@ if __name__ == "__main__":
         # 2️⃣ PAS DE MODÈLE : CRÉER UN NOUVEL AGENT
         print("\n🆕 Création d'un nouvel agent")
         agent = QLearningAgent(env)
-        train(agent, env, episodes=5000, max_steps=500, model_filename=model_file)
+        agent.train(env, episodes=5000, max_steps=500, model_filename=model_file)
 
     # 3️⃣ TEST FINAL
     print("\n" + "="*60)
     print("🎯 TEST FINAL")
     print("="*60)
-    test(agent, env, max_steps=500, render=True)
+    agent.test(env, max_steps=500, render=True)

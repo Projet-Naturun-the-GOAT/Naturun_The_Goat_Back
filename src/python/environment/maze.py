@@ -1,5 +1,5 @@
 import numpy as np
-
+import random
 
 class MazeEnv:
     def __init__(self, maze, start, goal):
@@ -70,6 +70,25 @@ class MazeEnv:
             maze_render[r, c] = 'A'
             maze_render[gr, gc] = 'G'
         print('\n'.join(' '.join(row) for row in maze_render))
+
+
+def generate_maze(width=31, height=31):
+    """Génère un labyrinthe aléatoire avec l'algorithme de backtracking récursif"""
+    maze = np.ones((height, width), dtype=int)
+
+    def carve(r, c):
+        dirs = [(2, 0), (-2, 0), (0, 2), (0, -2)]
+        random.shuffle(dirs)
+        for dr, dc in dirs:
+            nr, nc = r + dr, c + dc
+            if 1 <= nr < height-1 and 1 <= nc < width-1 and maze[nr, nc] == 1:
+                maze[nr-dr//2, nc-dc//2] = 0
+                maze[nr, nc] = 0
+                carve(nr, nc)
+
+    maze[1, 1] = 0
+    carve(1, 1)
+    return maze
 
 
 # Example usage:
