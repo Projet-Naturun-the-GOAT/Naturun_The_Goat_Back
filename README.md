@@ -78,7 +78,7 @@ Docker (en cours).
 
 ##### Lancement du projet
 
-python -m src.python.ai_agent.q_learning
+python -m src.main
 
 ##### Tests
 
