@@ -1,8 +1,6 @@
-# src/ai_agent/q_learning.py
 import numpy as np
 import random
 import os
-from src.python.environment.maze import MazeEnv, generate_maze
 
 class QLearningAgent:
     def __init__(self, env, alpha=0.1, gamma=0.95, epsilon=1.0, epsilon_min=0.01, epsilon_decay=0.9995):
@@ -156,13 +154,13 @@ class QLearningAgent:
             if ep % 10 == 0 or ep == episodes - 1:
                 print(f"Episode {ep:4d}/{episodes} | Reward: {total_reward:7.2f} | Steps: {steps:3d} | Epsilon: {self.epsilon:.4f} | États connus: {len(self.q_table)}")
 
-            # 🔥 SAUVEGARDE SI NOUVEAU RECORD
+            # SAUVEGARDE SI NOUVEAU RECORD
             if total_reward > best_reward:
                 best_reward = total_reward
                 print(f"   🎉 NOUVEAU RECORD! {total_reward:.2f} → Sauvegarde automatique")
                 self.save(model_filename, best_reward=best_reward)
             
-            # 💾 CHECKPOINT PÉRIODIQUE (toutes les N itérations)
+            # CHECKPOINT PÉRIODIQUE (toutes les N itérations)
             if (ep + 1) % save_interval == 0:
                 checkpoint_file = f"checkpoints/agent_ep{self.episodes_trained}.npy"
                 self.save(checkpoint_file, best_reward=best_reward)
@@ -218,57 +216,5 @@ class QLearningAgent:
 
         return total_reward, steps
     
-    
-if __name__ == "__main__":
-    # Générer ou charger un labyrinthe
-    random.seed(42)
-    maze = generate_maze(23, 23)  # Plus petit pour un apprentissage plus rapide
-    random.seed()  # Réinitialiser le seed global
-    env = MazeEnv(maze, start=(1, 1), goal=(21, 21))
 
-    model_file = "agent_model.npy"
 
-    # 1️⃣ TENTATIVE DE CHARGEMENT D'UN MODÈLE EXISTANT
-    loaded_agent, saved_data = QLearningAgent.load(model_file, env=env)
-
-    if loaded_agent is not None:
-        # Modèle trouvé : proposer de continuer ou tester
-        print("\n🤔 Options:")
-        print("  1. Continuer l'entraînement (l'agent garde sa mémoire)")
-        print("  2. Tester le modèle actuel")
-        print("  3. Recommencer de zéro (PERTE DE LA MÉMOIRE)")
-
-        choice = input("\nVotre choix (1/2/3): ").strip()
-
-        if choice == "1":
-            # CONTINUER L'APPRENTISSAGE
-            nb_episodes = int(input("Nombre d'épisodes supplémentaires: "))
-            loaded_agent.reset_exploration(epsilon=0.3)  # Réactiver un peu l'exploration
-            loaded_agent.train(env, episodes=nb_episodes, max_steps=500, model_filename=model_file)
-            agent = loaded_agent
-
-        elif choice == "2":
-            # JUSTE TESTER
-            agent = loaded_agent
-
-        else:
-            # RECOMMENCER
-            print("\n⚠️  Vous allez perdre toute la mémoire de l'agent!")
-            confirm = input("Confirmer (oui/non): ").strip().lower()
-            if confirm == "oui":
-                agent = QLearningAgent(env)
-                agent.train(env, episodes=5000, max_steps=500, model_filename=model_file)
-            else:
-                print("Annulé.")
-                exit()
-    else:
-        # 2️⃣ PAS DE MODÈLE : CRÉER UN NOUVEL AGENT
-        print("\n🆕 Création d'un nouvel agent")
-        agent = QLearningAgent(env)
-        agent.train(env, episodes=5000, max_steps=500, model_filename=model_file)
-
-    # 3️⃣ TEST FINAL
-    print("\n" + "="*60)
-    print("🎯 TEST FINAL")
-    print("="*60)
-    agent.test(env, max_steps=500, render=True)

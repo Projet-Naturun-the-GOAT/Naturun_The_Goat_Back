@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from src.python.environment.maze import MazeEnv
+from src.environment.maze import MazeEnv
 
 @pytest.fixture
 def setup_maze():
