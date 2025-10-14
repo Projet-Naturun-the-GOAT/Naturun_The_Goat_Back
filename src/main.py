@@ -68,7 +68,7 @@ def main(
     print("\n" + "="*60)
     print("🎯 TEST FINAL")
     print("="*60)
-    agent.test(env, max_steps=max_steps, render=True)
+    agent.test(env, max_steps=max_steps, render=False)
 
 
 if __name__ == "__main__":
