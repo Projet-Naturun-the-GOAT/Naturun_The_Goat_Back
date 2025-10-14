@@ -2,12 +2,14 @@ import random
 from src.environment.maze import MazeEnv, generate_maze
 from src.ai_agent.q_learning import QLearningAgent
 
+
 def init_environment(width=23, height=23, seed=42):
     """Crée un environnement MazeEnv reproductible."""
     random.seed(seed)
     maze = generate_maze(width, height)
     random.seed()  # reset global RNG
-    return MazeEnv(maze, start=(1, 1), goal=(height-2, width-2))
+    return MazeEnv(maze, start=(1, 1), goal=(height - 2, width - 2))
+
 
 def load_or_create_agent(model_file, env):
     """Charge un agent existant ou en crée un nouveau."""
@@ -18,15 +20,16 @@ def load_or_create_agent(model_file, env):
     print("\n🆕 Nouveau modèle créé")
     return agent, False
 
+
 def main(
     auto_train=False,
     episodes=5000,
     max_steps=500,
     model_file="agent_model.npy",
-    reset=False
+    reset=False,
 ):
     """Lance l'entraînement et/ou test de l'agent.
-    
+
     - auto_train=True  → aucun input, tout enchaîne automatiquement.
     - reset=True       → ignore tout modèle existant.
     """
@@ -42,7 +45,9 @@ def main(
         else:
             print("➡️  Modèle existant détecté — entraînement supplémentaire")
             agent.reset_exploration(epsilon=0.3)
-        agent.train(env, episodes=episodes, max_steps=max_steps, model_filename=model_file)
+        agent.train(
+            env, episodes=episodes, max_steps=max_steps, model_filename=model_file
+        )
 
     else:
         # === MODE INTERACTIF ===
@@ -56,18 +61,27 @@ def main(
             if choice == "1":
                 nb = int(input("Nombre d'épisodes supplémentaires: "))
                 agent.reset_exploration(epsilon=0.3)
-                agent.train(env, episodes=nb, max_steps=max_steps, model_filename=model_file)
+                agent.train(
+                    env, episodes=nb, max_steps=max_steps, model_filename=model_file
+                )
             elif choice == "3":
                 print("\n⚠️  Réinitialisation complète...")
                 agent = QLearningAgent(env)
-                agent.train(env, episodes=episodes, max_steps=max_steps, model_filename=model_file)
+                agent.train(
+                    env,
+                    episodes=episodes,
+                    max_steps=max_steps,
+                    model_filename=model_file,
+                )
         else:
-            agent.train(env, episodes=episodes, max_steps=max_steps, model_filename=model_file)
+            agent.train(
+                env, episodes=episodes, max_steps=max_steps, model_filename=model_file
+            )
 
     # === TEST FINAL ===
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🎯 TEST FINAL")
-    print("="*60)
+    print("=" * 60)
     agent.test(env, max_steps=max_steps, render=False)
 
 

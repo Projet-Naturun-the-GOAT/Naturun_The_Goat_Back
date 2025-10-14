@@ -1,6 +1,7 @@
 import numpy as np
 import random
 
+
 class MazeEnv:
     def __init__(self, maze, start, goal):
         """
@@ -38,9 +39,11 @@ class MazeEnv:
             next_state = self.state
 
         # Check boundaries and walls
-        if (0 <= next_state[0] < self.maze.shape[0] and
-            0 <= next_state[1] < self.maze.shape[1] and
-            self.maze[next_state] == 0):
+        if (
+            0 <= next_state[0] < self.maze.shape[0]
+            and 0 <= next_state[1] < self.maze.shape[1]
+            and self.maze[next_state] == 0
+        ):
             self.state = next_state
         else:
             next_state = self.state  # invalid move
@@ -60,16 +63,16 @@ class MazeEnv:
 
     def render(self):
         maze_render = np.array(self.maze, dtype=str)
-        maze_render[maze_render == '0'] = '.'
-        maze_render[maze_render == '1'] = '#'
+        maze_render[maze_render == "0"] = "."
+        maze_render[maze_render == "1"] = "#"
         r, c = self.state
         gr, gc = self.goal
         if (r, c) == (gr, gc):
-            maze_render[r, c] = '*'
+            maze_render[r, c] = "*"
         else:
-            maze_render[r, c] = 'A'
-            maze_render[gr, gc] = 'G'
-        print('\n'.join(' '.join(row) for row in maze_render))
+            maze_render[r, c] = "A"
+            maze_render[gr, gc] = "G"
+        print("\n".join(" ".join(row) for row in maze_render))
 
 
 def generate_maze(width=31, height=31):
@@ -81,8 +84,8 @@ def generate_maze(width=31, height=31):
         random.shuffle(dirs)
         for dr, dc in dirs:
             nr, nc = r + dr, c + dc
-            if 1 <= nr < height-1 and 1 <= nc < width-1 and maze[nr, nc] == 1:
-                maze[nr-dr//2, nc-dc//2] = 0
+            if 1 <= nr < height - 1 and 1 <= nc < width - 1 and maze[nr, nc] == 1:
+                maze[nr - dr // 2, nc - dc // 2] = 0
                 maze[nr, nc] = 0
                 carve(nr, nc)
 
