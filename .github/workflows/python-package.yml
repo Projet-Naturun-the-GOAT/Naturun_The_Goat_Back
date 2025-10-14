@@ -35,3 +35,12 @@ jobs:
         coverage html          # Génère un rapport de couverture HTML
         coverage report --fail-under=60  # Échoue si la couverture est < 60%
 
+    - name: Run Ruff linting
+      run: |
+        echo "Running Ruff checks..."
+        ruff check . --output-format=github
+
+    - name: Run Black formatting check
+      run: |
+        echo "Checking code formatting with Black..."
+        black --check .
