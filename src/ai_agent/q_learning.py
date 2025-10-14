@@ -154,8 +154,10 @@ class QLearningAgent:
             if ep % 10 == 0 or ep == episodes - 1:
                 print(f"Episode {ep:4d}/{episodes} | Reward: {total_reward:7.2f} | Steps: {steps:3d} | Epsilon: {self.epsilon:.4f} | États connus: {len(self.q_table)}")
 
-            # SAUVEGARDE SI NOUVEAU RECORD
-            if total_reward > best_reward:
+            improvement_threshold = 0.05  # Only save if >5% improvement
+
+            # In your training loop:
+            if total_reward > best_reward * (1 + improvement_threshold):
                 best_reward = total_reward
                 print(f"   🎉 NOUVEAU RECORD! {total_reward:.2f} → Sauvegarde automatique")
                 self.save(model_filename, best_reward=best_reward)
