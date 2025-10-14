@@ -51,7 +51,7 @@ class MazeEnv:
         elif next_state == old_state:
             reward = -0.5  # penalty for hitting wall
         else:
-            reward = -.2  # penalty for other valid moves
+            reward = -0.2  # penalty for other valid moves
 
         info = {}
         self.n_steps += 1
