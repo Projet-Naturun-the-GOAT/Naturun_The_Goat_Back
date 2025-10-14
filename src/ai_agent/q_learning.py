@@ -154,8 +154,11 @@ class QLearningAgent:
             if ep % 10 == 0 or ep == episodes - 1:
                 print(f"Episode {ep:4d}/{episodes} | Reward: {total_reward:7.2f} | Steps: {steps:3d} | Epsilon: {self.epsilon:.4f} | États connus: {len(self.q_table)}")
 
-            improvement_threshold = 0.05  # Only save if >5% improvement
-
+            if best_reward < 0:
+                improvement_threshold = -0.05 
+            else: 
+                improvement_threshold = 0.05
+            
             # In your training loop:
             if total_reward > best_reward * (1 + improvement_threshold):
                 best_reward = total_reward
