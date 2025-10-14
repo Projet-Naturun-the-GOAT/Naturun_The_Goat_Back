@@ -74,7 +74,7 @@ Docker (en cours).
 
 1 git clone https://github.com/Projet-Naturun-the-GOAT/Naturun_The_Goat_Back.git
 
-2 cd <repo>
+2 cd Naturun_The_Goat_Back
 
 ##### 3️⃣ Lancement du projet
 
