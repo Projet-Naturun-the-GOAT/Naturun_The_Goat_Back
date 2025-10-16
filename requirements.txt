@@ -3,3 +3,5 @@ coverage
 black
 numpy
 ruff
+pre-commit
+isort
