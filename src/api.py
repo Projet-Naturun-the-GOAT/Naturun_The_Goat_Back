@@ -5,7 +5,7 @@ from environment.maze import generate_maze
 
 app = FastAPI()
 
-# Autorise ton front (ex: React/Vite/Express)
+# Allow requests from front-end applications (e.g., React, Vite, Express) by configuring CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
