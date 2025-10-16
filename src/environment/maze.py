@@ -76,7 +76,7 @@ class MazeEnv:
 
 
 def generate_maze(width=31, height=31):
-    """Génère un labyrinthe aléatoire avec l'algorithme de backtracking récursif"""
+    """Generates a random maze with recursive backtracking algorithm"""
     maze = np.ones((height, width), dtype=int)
 
     def carve(r, c):

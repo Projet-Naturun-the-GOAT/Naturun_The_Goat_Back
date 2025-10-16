@@ -4,7 +4,7 @@ from src.ai_agent.q_learning import QLearningAgent
 
 
 def init_environment(width=23, height=23, seed=42):
-    """Crée un environnement MazeEnv reproductible."""
+    """Creates a reproducible MazeEnv environment."""
     random.seed(seed)
     maze = generate_maze(width, height)
     random.seed()  # reset global RNG
@@ -12,12 +12,12 @@ def init_environment(width=23, height=23, seed=42):
 
 
 def load_or_create_agent(model_file, env):
-    """Charge un agent existant ou en crée un nouveau."""
+    """Loads an existing agent or creates a new one."""
     agent, saved_data = QLearningAgent.load(model_file, env=env)
     if agent is not None:
         return agent, True
     agent = QLearningAgent(env)
-    print("\n🆕 Nouveau modèle créé")
+    print("\n🆕 New model created")
     return agent, False
 
 
@@ -28,44 +28,44 @@ def main(
     model_file="agent_model.npy",
     reset=False,
 ):
-    """Lance l'entraînement et/ou test de l'agent.
+    """Starts agent training and/or testing.
 
-    - auto_train=True  → aucun input, tout enchaîne automatiquement.
-    - reset=True       → ignore tout modèle existant.
+    - auto_train=True  → no input, everything runs automatically.
+    - reset=True       → ignores any existing model.
     """
 
     env = init_environment()
     agent, loaded = load_or_create_agent(model_file, env)
 
     if auto_train:
-        print("\n🤖 MODE AUTOMATIQUE ACTIVÉ")
+        print("\n🤖 AUTOMATIC MODE ENABLED")
         if reset or not loaded:
-            print("➡️  Création d’un nouvel agent (aucune donnée chargée)")
+            print("➡️  Creating a new agent (no data loaded)")
             agent = QLearningAgent(env)
         else:
-            print("➡️  Modèle existant détecté — entraînement supplémentaire")
+            print("➡️  Existing model detected — additional training")
             agent.reset_exploration(epsilon=0.3)
         agent.train(
             env, episodes=episodes, max_steps=max_steps, model_filename=model_file
         )
 
     else:
-        # === MODE INTERACTIF ===
+        # === INTERACTIVE MODE ===
         if loaded:
             print("\n🤔 Options:")
-            print("  1. Continuer l'entraînement")
-            print("  2. Tester le modèle actuel")
-            print("  3. Réinitialiser (perte de mémoire)")
-            choice = input("\nVotre choix (1/2/3): ").strip()
+            print("  1. Continue training")
+            print("  2. Test the current model")
+            print("  3. Reset (memory loss)")
+            choice = input("\nYour choice (1/2/3): ").strip()
 
             if choice == "1":
-                nb = int(input("Nombre d'épisodes supplémentaires: "))
+                nb = int(input("Number of additional episodes: "))
                 agent.reset_exploration(epsilon=0.3)
                 agent.train(
                     env, episodes=nb, max_steps=max_steps, model_filename=model_file
                 )
             elif choice == "3":
-                print("\n⚠️  Réinitialisation complète...")
+                print("\n⚠️  Complete reset...")
                 agent = QLearningAgent(env)
                 agent.train(
                     env,
@@ -78,13 +78,13 @@ def main(
                 env, episodes=episodes, max_steps=max_steps, model_filename=model_file
             )
 
-    # === TEST FINAL ===
+    # === FINAL TEST ===
     print("\n" + "=" * 60)
-    print("🎯 TEST FINAL")
+    print("🎯 FINAL TEST")
     print("=" * 60)
     agent.test(env, max_steps=max_steps, render=False)
 
 
 if __name__ == "__main__":
-    # ⚙️ Mode manuel par défaut
+    # ⚙️ Manual mode by default
     main(auto_train=False, reset=False, episodes=500)
