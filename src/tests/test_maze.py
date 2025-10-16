@@ -1,5 +1,6 @@
-import pytest
 import numpy as np
+import pytest
+
 from src.environment.maze import MazeEnv
 
 REWARD_GOAL = 20.0
