@@ -67,14 +67,14 @@ def main(
                 )
             elif choice == "3":
                 print("\n⚠️  Réinitialisation complète...")
-    
+
                 # Supprimer le modèle précédent s’il existe
                 if os.path.exists(model_file):
                     os.remove(model_file)
                     print(f"🗑️  Ancien modèle supprimé : {model_file}")
                 else:
                     print("ℹ️  Aucun modèle existant à supprimer.")
-                
+
                 # 🔁 Recréation complète de l’agent
                 env.reset()
                 agent = QLearningAgent(env)
