@@ -78,6 +78,10 @@ Docker (en cours).
 
 3 ```pip install -r requirements.txt```
 
+##### Installation du hook pre-commit (permet de formater le code à chaque commit)
+
+```pre-commit install```
+
 ##### Lancement du projet
 
 ```python -m src.main```
