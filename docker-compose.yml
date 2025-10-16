@@ -9,12 +9,12 @@ services:
     restart: always
     environment:
       - PYTHONUNBUFFERED=1
-  
+    
     networks:
       - naturun_net
 
   # --- Partie 2 : API Node.js ---
-  front:
+  api_server:
     build:
       context: ../Naturun_The_Goat_FRONT
       dockerfile: Dockerfile
