@@ -30,7 +30,7 @@ jobs:
 
     - name: Run tests with pytest and measure coverage
       run: |
-        coverage run -m pytest  # Lance pytest avec coverage
+        coverage run --omit="src/tests/*" -m pytest  # Lance pytest avec coverage
         coverage report        # Affiche un résumé de la couverture
         coverage html          # Génère un rapport de couverture HTML
         coverage report --fail-under=60 --omit="src/tests/*"  # Échoue si la couverture est < 60%
