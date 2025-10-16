@@ -72,14 +72,16 @@ Docker (en cours).
 
 ##### Installation
 
-1 git clone https://github.com/Projet-Naturun-the-GOAT/Naturun_The_Goat_Back.git
+1 ```git clone https://github.com/Projet-Naturun-the-GOAT/Naturun_The_Goat_Back.git```
 
-2 cd Naturun_The_Goat_Back
+2 ```cd Naturun_The_Goat_Back```
+
+3 ```pip install -r requirements.txt```
 
 ##### Lancement du projet
 
-python -m src.main
+```python -m src.main```
 
 ##### Tests
 
-coverage run -m pytest
+```coverage run -m pytest```
