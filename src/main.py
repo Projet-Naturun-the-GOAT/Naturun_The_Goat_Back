@@ -73,8 +73,11 @@ def main(
 
                 # Supprimer le modèle précédent s’il existe
                 if os.path.exists(model_file):
-                    os.remove(model_file)
-                    print(f"🗑️  Ancien modèle supprimé : {model_file}")
+                    try:
+                        os.remove(model_file)
+                        print(f"🗑️  Ancien modèle supprimé : {model_file}")
+                    except OSError as e:
+                        print(f"⚠️  Échec de la suppression du modèle : {model_file} ({e})")
                 else:
                     print("ℹ️  Aucun modèle existant à supprimer.")
 
