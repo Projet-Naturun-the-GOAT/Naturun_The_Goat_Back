@@ -9,21 +9,26 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000", "http://127.0.0.1:3000",
-        "http://localhost:5173", "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 @app.get("/api/bonjour")
 def dire_bonjour():
     return {"message": "Bonjour 👋 depuis l'API FastAPI !"}
 
+
 # ---------- ASCII endpoint (Option A) ----------
 def make_odd(n: int) -> int:
     return n if n % 2 == 1 else n + 1
+
 
 def grid_to_ascii(grid, start=None, end=None) -> str:
     """grid: liste de listes 0/1 ; 1 = mur '#', 0 = chemin '.'"""
@@ -33,13 +38,14 @@ def grid_to_ascii(grid, start=None, end=None) -> str:
         row_chars = []
         for c in range(W):
             if start and (r, c) == start:
-                row_chars.append('S')
+                row_chars.append("S")
             elif end and (r, c) == end:
-                row_chars.append('E')
+                row_chars.append("E")
             else:
-                row_chars.append('#' if grid[r][c] == 1 else '.')
-        lines.append(''.join(row_chars))
-    return '\n'.join(lines)
+                row_chars.append("#" if grid[r][c] == 1 else ".")
+        lines.append("".join(row_chars))
+    return "\n".join(lines)
+
 
 @app.get("/api/maze/ascii", response_class=PlainTextResponse)
 def api_maze_ascii(
@@ -61,16 +67,23 @@ def api_maze_ascii(
         pass  # déjà une liste
 
     # positions S/E par défaut si non fournies
-    start = (start_row if start_row is not None else 1,
-             start_col if start_col is not None else 1)
-    end = (end_row if end_row is not None else H - 2,
-           end_col if end_col is not None else W - 2)
+    start = (
+        start_row if start_row is not None else 1,
+        start_col if start_col is not None else 1,
+    )
+    end = (
+        end_row if end_row is not None else H - 2,
+        end_col if end_col is not None else W - 2,
+    )
 
     ascii_map = grid_to_ascii(grid, start=start, end=end)
     return ascii_map
+
+
 # -----------------------------------------------
 
 # Pour exécution directe (ex: python api.py)
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("api:app", host="127.0.0.1", port=8000, reload=True)
