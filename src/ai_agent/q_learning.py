@@ -188,7 +188,6 @@ class QLearningAgent:
         print(f"\n{'='*60}")
         print("💾 Sauvegarde finale...")
         self.save(model_filename, best_reward=best_reward)
-        
         print(f"{'='*60}")
 
     def test(self, env, max_steps=200, render=True):
