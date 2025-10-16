@@ -3,3 +3,7 @@ coverage
 black
 numpy
 ruff
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
