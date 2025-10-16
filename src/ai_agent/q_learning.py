@@ -21,7 +21,7 @@ class QLearningAgent:
         self.epsilon_decay = epsilon_decay
         self.action_size = 4  # up, down, left, right
         self.q_table = {}  # {(row, col): [Q_up, Q_down, Q_left, Q_right]}
-        self.episodes_trained = 0  # Compteur d'épisodes total
+        self.episodes_trained = 0  # Total episode counter
 
     def ensure_state(self, state):
         if state not in self.q_table:
@@ -68,7 +68,7 @@ class QLearningAgent:
             },
         }
 
-        # Créer le dossier si nécessaire
+        # Create folder if necessary
         os.makedirs(
             os.path.dirname(filename) if os.path.dirname(filename) else ".",
             exist_ok=True,
@@ -90,13 +90,13 @@ class QLearningAgent:
 
             agent = cls(env=env)
 
-            # Restaurer la Q-table (LA MÉMOIRE!)
+            # Restore the Q-table (THE MEMORY!)
             agent.q_table = saved_data.get("q_table", {})
 
-            # Restaurer le nombre d'épisodes
+            # Restore the number of episodes
             agent.episodes_trained = saved_data.get("episodes_trained", 0)
 
-            # Restaurer les hyperparamètres
+            # Restore the hyperparameters
             if "hyperparameters" in saved_data:
                 params = saved_data["hyperparameters"]
                 agent.alpha = params.get("alpha", agent.alpha)
@@ -132,7 +132,7 @@ class QLearningAgent:
     ):
         """Entraînement avec sauvegarde automatique de la mémoire"""
 
-        # Charger le meilleur reward précédent
+        # Load the previous best reward
         best_reward = float("-inf")
         if os.path.exists(model_filename):
             try:
@@ -157,7 +157,7 @@ class QLearningAgent:
             total_reward = 0
             steps = 0
 
-            # EXPLORATION DE L'ÉPISODE
+            # EPISODE EXPLORATION
             while not done and steps < max_steps:
                 action = self.choose_action(state)
                 next_state, reward, done, _ = env.step(action)
@@ -166,17 +166,17 @@ class QLearningAgent:
                 total_reward += reward
                 steps += 1
 
-            # MISE À JOUR POST-ÉPISODE
+            # POST-EPISODE UPDATE
             self.episodes_trained += 1
-            self.decay_epsilon()  # Réduire l'exploration progressivement
+            self.decay_epsilon()  # Reduce exploration progressively
 
-            # Affichage périodique
+            # Periodic display
             if ep % 10 == 0 or ep == episodes - 1:
                 print(
                     f"Episode {ep:4d}/{episodes} | Reward: {total_reward:7.2f} | Steps: {steps:3d} | Epsilon: {self.epsilon:.4f} | États connus: {len(self.q_table)}"
                 )
 
-            # AMÉLIORATION SIGNIFICATIVE
+            # SIGNIFICANT IMPROVEMENT
             if best_reward < 0:
                 improvement_threshold = -0.05
             else:
@@ -185,12 +185,12 @@ class QLearningAgent:
             if total_reward > best_reward * (1 + improvement_threshold):
                 best_reward = total_reward
 
-            # CHECKPOINT PÉRIODIQUE (toutes les N itérations)
+            # PERIODIC CHECKPOINT (every N iterations)
             if (ep + 1) % save_interval == 0:
                 checkpoint_file = f"checkpoints/agent_ep{self.episodes_trained}.npy"
                 self.save(checkpoint_file, best_reward=best_reward)
 
-        # SAUVEGARDE FINALE
+        # FINAL SAVE
         print(f"\n{'='*60}")
         print("💾 Sauvegarde finale...")
         self.save(model_filename, best_reward=best_reward)
@@ -198,9 +198,9 @@ class QLearningAgent:
 
     def test(self, env, max_steps=200, render=True):
         """Test de l'agent (MODE EXPLOITATION PURE)"""
-        # Sauvegarder l'epsilon actuel
+        # Save current epsilon
         original_epsilon = self.epsilon
-        self.epsilon = 0.0  # Désactiver l'exploration pour le test
+        self.epsilon = 0.0  # Disable exploration for testing
 
         state = env.reset()
         total_reward = 0
@@ -215,7 +215,7 @@ class QLearningAgent:
 
         for step in range(max_steps):
             self.ensure_state(state)
-            action = int(np.argmax(self.q_table[state]))  # Toujours la meilleure action
+            action = int(np.argmax(self.q_table[state]))  # Always the best action
             next_state, reward, done, _ = env.step(action)
 
             total_reward += reward
@@ -236,7 +236,7 @@ class QLearningAgent:
             print(f"\n⏱️  Timeout ({max_steps} étapes max)")
             print(f"   Reward total: {total_reward:.2f}")
 
-        # Restaurer epsilon
+        # Restore epsilon
         self.epsilon = original_epsilon
 
         return total_reward, steps
