@@ -54,7 +54,7 @@ def main(
         )
 
     else:
-        # === MODE INTERACTIF ===
+        # === INTERACTIVE MODE ===
         if loaded:
             print("\n🤔 Options:")
             print("  1. Continuer l'entraînement")
@@ -97,7 +97,7 @@ def main(
                 env, episodes=episodes, max_steps=max_steps, model_filename=model_file
             )
 
-    # === TEST FINAL ===
+    # === FINAL TEST ===
     print("\n" + "=" * 60)
     print("🎯 TEST FINAL")
     print("=" * 60)
@@ -105,5 +105,5 @@ def main(
 
 
 if __name__ == "__main__":
-    # ⚙️ Mode manuel par défaut
-    main(auto_train=False, reset=False, episodes=5000)
+    # ⚙️ Manual mode by default
+    main(auto_train=False, reset=False, episodes=500)
