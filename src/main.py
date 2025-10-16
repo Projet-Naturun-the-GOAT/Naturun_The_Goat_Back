@@ -79,6 +79,7 @@ def main(
                     print("ℹ️  Aucun modèle existant à supprimer.")
                 
                 # 🔁 Recréation complète de l’agent
+                env.reset()
                 agent = QLearningAgent(env)
                 agent.train(
                     env,
