@@ -3,12 +3,12 @@ from src.environment.maze import MazeEnv, generate_maze
 from src.ai_agent.q_learning import QLearningAgent
 
 
-def init_environment(width=23, height=23, seed=42):
+def init_environment(width=23, height=23, seed=42, level=1):
     """Crée un environnement MazeEnv reproductible."""
     random.seed(seed)
     maze = generate_maze(width, height)
     random.seed()  # reset global RNG
-    return MazeEnv(maze, start=(1, 1), goal=(height - 2, width - 2))
+    return MazeEnv(maze, start=(1, 1), goal=(height - 2, width - 2), level=level)
 
 
 def load_or_create_agent(model_file, env):
@@ -33,8 +33,11 @@ def main(
     - auto_train=True  → aucun input, tout enchaîne automatiquement.
     - reset=True       → ignore tout modèle existant.
     """
+    print("\n🤖 MODE INTERACTIF ACTIVÉ")
 
-    env = init_environment()
+    choice = input("\nVeuillez choisir le niveau du labyrinthe (1-2): ").strip()
+
+    env = init_environment(level=int(choice))
     agent, loaded = load_or_create_agent(model_file, env)
 
     if auto_train:
@@ -82,7 +85,7 @@ def main(
     print("\n" + "=" * 60)
     print("🎯 TEST FINAL")
     print("=" * 60)
-    agent.test(env, max_steps=max_steps, render=False)
+    agent.test(env, max_steps=max_steps, render=True)
 
 
 if __name__ == "__main__":

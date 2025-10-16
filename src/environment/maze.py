@@ -3,7 +3,7 @@ import random
 
 
 class MazeEnv:
-    def __init__(self, maze, start, goal):
+    def __init__(self, maze, start, goal, level=1):
         """
         maze: 2D numpy array, 0=free, 1=wall
         start: (row, col) tuple
@@ -14,6 +14,7 @@ class MazeEnv:
         self.goal = goal
         self.state = start
         self.n_steps = 0
+        self.level = level
 
     def reset(self):
         self.state = self.start
@@ -53,6 +54,10 @@ class MazeEnv:
             reward = 20.0
         elif next_state == old_state:
             reward = -0.5  # penalty for hitting wall
+        elif self.maze[next_state] == "2":  # door
+            reward = -1.3
+        elif self.maze[next_state] == "3":  # key
+            reward = 8.0
         else:
             reward = -0.2  # penalty for other valid moves
 
@@ -60,8 +65,16 @@ class MazeEnv:
         self.n_steps += 1
 
         return next_state, reward, done, info
-
+    
     def render(self):
+        if self.level == 1:
+            self.render_level_1()
+        elif self.level == 2:
+            self.render_level_2()
+        else:
+            print("Niveau de rendu inconnu.")
+
+    def render_level_1(self):
         maze_render = np.array(self.maze, dtype=str)
         maze_render[maze_render == "0"] = "."
         maze_render[maze_render == "1"] = "#"
@@ -73,15 +86,49 @@ class MazeEnv:
             maze_render[r, c] = "A"
             maze_render[gr, gc] = "G"
         print("\n".join(" ".join(row) for row in maze_render))
+        
+    def render_level_2(self):
+        maze_render = np.array(self.maze, dtype=str)
+        maze_render[maze_render == "0"] = "."  # path
+        maze_render[maze_render == "1"] = "#"  # wall
+        maze_render[maze_render == "2"] = "D"  # door
+        maze_render[maze_render == "3"] = "🔑"  # key
+        r, c = self.state  # agent position row, col
+        gr, gc = self.goal  # goal position row, col
+        # Set doors around the goal
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nr, nc = gr + dr, gc + dc  # neighbor row, col
+            # Check bounds and if it's not a wall
+            if 0 <= nr < self.maze.shape[0] and 0 <= nc < self.maze.shape[1]:
+                if self.maze[nr, nc] == 0:
+                    maze_render[nr, nc] = "2"
+                    self.maze[nr, nc] = 2  # mark as door in the maze
+
+        kr, kc = 1, self.maze.shape[1] - 2
+        self.maze[kr, kc] = "3"
+        if (r, c) == (kr, kc):
+            maze_render[r, c] = "A"
+        
+        if (r, c) == (gr, gc):
+            maze_render[r, c] = "*"
+        elif (r, c) == (kr, kc):
+            maze_render[r, c] = "A"
+        elif (r, c) == (dr, dc):
+            maze_render[r, c] = "A"
+        else:
+            maze_render[r, c] = "A"
+            maze_render[gr, gc] = "G"
+        print("\n".join(" ".join(row) for row in maze_render))
 
 
 def generate_maze(width=31, height=31):
     """Génère un labyrinthe aléatoire avec l'algorithme de backtracking récursif"""
     maze = np.ones((height, width), dtype=int)
 
+    """Carve est une fonction récursive pour creuser des chemins dans le labyrinthe"""
     def carve(r, c):
         dirs = [(2, 0), (-2, 0), (0, 2), (0, -2)]
-        random.shuffle(dirs)
+        random.shuffle(dirs) 
         for dr, dc in dirs:
             nr, nc = r + dr, c + dc
             if 1 <= nr < height - 1 and 1 <= nc < width - 1 and maze[nr, nc] == 1:
@@ -89,7 +136,7 @@ def generate_maze(width=31, height=31):
                 maze[nr, nc] = 0
                 carve(nr, nc)
 
-    maze[1, 1] = 0
+    maze[1, 1] = 0  # Start point
     carve(1, 1)
     return maze
 
