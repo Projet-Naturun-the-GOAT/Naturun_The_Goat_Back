@@ -1,0 +1,37 @@
+
+services:
+  # --- Partie 1 : IA Python ---
+  ai_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: naturun_ai
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1
+  
+    networks:
+      - naturun_net
+
+  # --- Partie 2 : API Node.js ---
+  api_server:
+    build:
+      context: ../Naturun_The_Goat_FRONT
+      dockerfile: Dockerfile
+    container_name: naturun_front
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - ai_agent
+    networks:
+      - naturun_net
+
+# Réseau interne partagé par les services
+networks:
+  naturun_net:
+    driver: bridge
