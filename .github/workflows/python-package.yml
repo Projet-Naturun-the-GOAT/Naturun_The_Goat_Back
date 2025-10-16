@@ -33,7 +33,7 @@ jobs:
         coverage run -m pytest  # Lance pytest avec coverage
         coverage report        # Affiche un résumé de la couverture
         coverage html          # Génère un rapport de couverture HTML
-        coverage report --fail-under=60  # Échoue si la couverture est < 60%
+        coverage report --fail-under=60 --omit="src/tests/*"  # Échoue si la couverture est < 60%
 
     - name: Run Ruff linting
       run: |
