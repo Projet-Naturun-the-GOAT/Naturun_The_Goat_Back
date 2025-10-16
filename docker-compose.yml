@@ -14,7 +14,7 @@ services:
       - naturun_net
 
   # --- Partie 2 : API Node.js ---
-  api_server:
+  front:
     build:
       context: ../Naturun_The_Goat_FRONT
       dockerfile: Dockerfile
