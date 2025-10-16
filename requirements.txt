@@ -7,3 +7,5 @@ fastapi
 uvicorn[standard]
 pydantic
 python-multipart
+pre-commit
+isort
