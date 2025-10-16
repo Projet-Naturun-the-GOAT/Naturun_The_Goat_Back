@@ -150,7 +150,6 @@ class QLearningAgent:
         env,
         episodes=50,
         max_steps=200,
-        save_interval=100,
         model_filename="agent_model.npy",
     ):
         """Entraînement avec sauvegarde automatique de la mémoire"""

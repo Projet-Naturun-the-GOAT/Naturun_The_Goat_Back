@@ -1,4 +1,5 @@
 import random
+import os
 from src.environment.maze import MazeEnv, generate_maze
 from src.ai_agent.q_learning import QLearningAgent
 
@@ -69,6 +70,15 @@ def main(
                 )
             elif choice == "3":
                 print("\n⚠️  Réinitialisation complète...")
+    
+                # Supprimer le modèle précédent s’il existe
+                if os.path.exists(model_file):
+                    os.remove(model_file)
+                    print(f"🗑️  Ancien modèle supprimé : {model_file}")
+                else:
+                    print("ℹ️  Aucun modèle existant à supprimer.")
+                
+                # 🔁 Recréation complète de l’agent
                 agent = QLearningAgent(env)
                 agent.train(
                     env,
