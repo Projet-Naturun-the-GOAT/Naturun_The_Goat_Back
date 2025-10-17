@@ -2,6 +2,7 @@ import random
 import os
 from src.environment.maze import MazeEnv, generate_maze
 from src.ai_agent.q_learning import QLearningAgent
+from src.environment.maze import MazeEnv, generate_maze
 
 
 def init_environment(width=23, height=23, seed=42):
@@ -51,7 +52,7 @@ def main(
         )
 
     else:
-        # === MODE INTERACTIF ===
+        # === INTERACTIVE MODE ===
         if loaded:
             print("\n🤔 Options:")
             print("  1. Continuer l'entraînement")
@@ -94,13 +95,13 @@ def main(
                 env, episodes=episodes, max_steps=max_steps, model_filename=model_file
             )
 
-    # === TEST FINAL ===
+    # === FINAL TEST ===
     print("\n" + "=" * 60)
     print("🎯 TEST FINAL")
     print("=" * 60)
-    agent.test(env, max_steps=max_steps, render=False)
+    agent.test(env, max_steps=max_steps, render=True)
 
 
 if __name__ == "__main__":
-    # ⚙️ Mode manuel par défaut
+    # ⚙️ Manual mode by default
     main(auto_train=False, reset=False, episodes=500)

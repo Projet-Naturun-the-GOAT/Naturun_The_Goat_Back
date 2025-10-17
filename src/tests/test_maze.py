@@ -1,5 +1,6 @@
-import pytest
 import numpy as np
+import pytest
+
 from src.environment.maze import MazeEnv
 
 REWARD_GOAL = 20.0
@@ -40,7 +41,7 @@ def test_move_up(setup_maze):
     env.start = (
         1,
         0,
-    )  # Positionner l'agent en (1,0) pour tester le mouvement vers le haut
+    )  # Position the agent at (1,0) to test upward movement
     env.reset()
     state, reward, done, info = env.step(0)  # action = 0 (up)
     assert state == (
@@ -69,7 +70,7 @@ def test_move_left(setup_maze):
     env.start = (
         2,
         1,
-    )  # Positionner l'agent en (2,1) pour tester le mouvement vers la gauche
+    )  # Position the agent at (2,1) to test leftward movement
     env.reset()
     state, reward, done, info = env.step(2)  # action = 2 (left)
     assert state == (2, 0), "L'agent devrait se déplacer vers la gauche."
@@ -84,7 +85,7 @@ def test_move_right(setup_maze):
     env.start = (
         2,
         0,
-    )  # Positionner l'agent en (2,0) pour tester le mouvement vers la droite
+    )  # Position the agent at (2,0) to test rightward movement
     env.reset()
     state, reward, done, info = env.step(3)  # action = 3 (right)
     assert state == (2, 1), "L'agent devrait se déplacer vers la droite."
@@ -97,7 +98,7 @@ def test_hit_wall(setup_maze):
     """Test des mouvements dans un mur."""
     env = setup_maze
     env.reset()
-    state, reward, done, info = env.step(2)  # action = 2 (left) (mouvement vers un mur)
+    state, reward, done, info = env.step(2)  # action = 2 (left) (movement towards a wall)
     assert state == (0, 0), "L'agent ne peut pas se déplacer dans un mur."
     assert (
         reward == REWARD_WALL
@@ -111,8 +112,8 @@ def test_reach_goal(setup_maze):
     goal = (1, 0)
     env = MazeEnv(maze, start, goal)
     env.reset()
-    # Avancer jusqu'au but (bas, bas, droite, droite)
-    state, reward, done, info = env.step(1)  # right (atteindre l'objectif)
+    # Move to the goal (down, down, right, right)
+    state, reward, done, info = env.step(1)  # right (reach the objective)
 
     assert done is True, "L'agent devrait avoir atteint l'objectif."
     assert state == env.goal, "L'agent devrait atteindre la position de l'objectif."
@@ -126,8 +127,8 @@ def test_step_invalid_move(setup_maze):
     env = setup_maze
     env.reset()
     old_state = env.state
-    # Test si l'agent essaie de se déplacer en dehors des limites du labyrinthe
-    state, reward, done, info = env.step(0)  # up (mouvement invalide vers un mur)
+    # Test if the agent tries to move outside the maze boundaries
+    state, reward, done, info = env.step(0)  # up (invalid movement towards a wall)
     assert (
         state == old_state
     ), "L'agent ne devrait pas pouvoir se déplacer dans une zone bloquée."
@@ -141,6 +142,6 @@ def test_render(setup_maze):
     env = setup_maze
     env.reset()
     try:
-        env.render()  # Juste vérifier que cela ne lève pas d'exception
+        env.render()  # Just check that this doesn't raise an exception
     except Exception as e:
         pytest.fail(f"La méthode render a levé une exception: {e}")
