@@ -1,5 +1,6 @@
-import random
 import os
+import random
+
 from src.ai_agent.q_learning import QLearningAgent
 from src.environment.maze import MazeEnv, generate_maze
 
