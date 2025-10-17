@@ -3,6 +3,8 @@ coverage
 black
 numpy
 ruff
+pre-commit
+isort
 fastapi
 uvicorn[standard]
 pydantic
