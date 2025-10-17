@@ -128,7 +128,6 @@ class QLearningAgent:
         env,
         episodes=50,
         max_steps=200,
-        save_interval=100,
         model_filename="agent_model.npy",
     ):
         """Entraînement avec sauvegarde automatique de la mémoire"""
@@ -186,12 +185,7 @@ class QLearningAgent:
             if total_reward > best_reward * (1 + improvement_threshold):
                 best_reward = total_reward
 
-            # PERIODIC CHECKPOINT (every N iterations)
-            if (ep + 1) % save_interval == 0:
-                checkpoint_file = f"checkpoints/agent_ep{self.episodes_trained}.npy"
-                self.save(checkpoint_file, best_reward=best_reward)
-
-        # FINAL SAVE
+        # SAUVEGARDE FINALE
         print(f"\n{'='*60}")
         print("💾 Sauvegarde finale...")
         self.save(model_filename, best_reward=best_reward)

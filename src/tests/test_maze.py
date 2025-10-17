@@ -98,7 +98,9 @@ def test_hit_wall(setup_maze):
     """Test des mouvements dans un mur."""
     env = setup_maze
     env.reset()
-    state, reward, done, info = env.step(2)  # action = 2 (left) (movement towards a wall)
+    state, reward, done, info = env.step(
+        2
+    )  # action = 2 (left) (movement towards a wall)
     assert state == (0, 0), "L'agent ne peut pas se déplacer dans un mur."
     assert (
         reward == REWARD_WALL
