@@ -24,7 +24,7 @@ def load_or_create_agent(model_file, env):
 def main(
     auto_train=False,
     episodes=5000,
-    max_steps=500,
+    max_steps=400,
     model_file="agent_model.npy",
     reset=False,
 ):
@@ -90,4 +90,4 @@ def main(
 
 if __name__ == "__main__":
     # ⚙️ Mode manuel par défaut
-    main(auto_train=False, reset=False, episodes=500)
+    main(auto_train=False, reset=False, episodes=5000)

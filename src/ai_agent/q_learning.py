@@ -10,7 +10,7 @@ class QLearningAgent:
         alpha=0.1,
         gamma=0.95,
         epsilon=1.0,
-        epsilon_min=0.01,
+        epsilon_min=0.1,
         epsilon_decay=0.9995,
     ):
         self.env = env
@@ -22,18 +22,29 @@ class QLearningAgent:
         self.action_size = 4  # up, down, left, right
         self.q_table = {}  # {(row, col): [Q_up, Q_down, Q_left, Q_right]}
         self.episodes_trained = 0  # Compteur d'épisodes total
+        self.best_rewards = {}
 
+    def get_full_state(self, state):
+        # Pour le niveau 2, inclure la clé dans l'état
+        if hasattr(self.env, "level") and self.env.level == 2 and hasattr(self.env, "has_key"):
+            return (state[0], state[1], self.env.has_key)
+        return state
+    
     def ensure_state(self, state):
+        state = self.get_full_state(state)
         if state not in self.q_table:
             self.q_table[state] = np.zeros(self.action_size)
-
+            
     def choose_action(self, state):
+        state = self.get_full_state(state)
         self.ensure_state(state)
         if random.random() < self.epsilon:
             return random.randint(0, self.action_size - 1)
         return int(np.argmax(self.q_table[state]))
 
     def update(self, state, action, reward, next_state, done):
+        state = self.get_full_state(state)
+        next_state = self.get_full_state(next_state)
         self.ensure_state(state)
         self.ensure_state(next_state)
 
@@ -84,6 +95,9 @@ class QLearningAgent:
     @classmethod
     def load(cls, filename, env=None):
         """Charge un agent avec TOUTE sa mémoire"""
+        if not os.path.exists(filename):
+            print(f"⚠️  Aucun modèle trouvé: {filename}")
+            return None, {}
         try:
             with open(filename, "rb") as f:
                 saved_data = np.load(f, allow_pickle=True).item()
@@ -92,6 +106,9 @@ class QLearningAgent:
 
             # Restaurer la Q-table (LA MÉMOIRE!)
             agent.q_table = saved_data.get("q_table", {})
+
+            # Restaurer les meilleures récompenses
+            agent.best_rewards = saved_data.get("best_rewards", {})
 
             # Restaurer le nombre d'épisodes
             agent.episodes_trained = saved_data.get("episodes_trained", 0)
@@ -102,16 +119,22 @@ class QLearningAgent:
                 agent.alpha = params.get("alpha", agent.alpha)
                 agent.gamma = params.get("gamma", agent.gamma)
                 agent.epsilon = params.get("epsilon", agent.epsilon)
-                agent.epsilon_min = params.get("epsilon_min", agent.epsilon_min)
-                agent.epsilon_decay = params.get("epsilon_decay", agent.epsilon_decay)
+                agent.epsilon_min = params.get(
+                    "epsilon_min", agent.epsilon_min)
+                agent.epsilon_decay = params.get(
+                    "epsilon_decay", agent.epsilon_decay)
 
-            best_reward = saved_data.get("best_reward", "Inconnu")
+            saved_best_reward = saved_data.get("best_reward", float("-inf"))
+            if isinstance(saved_best_reward, dict):
+                agent.best_rewards = saved_best_reward
+            else:
+                agent.best_rewards = {getattr(env, "level", 1): saved_best_reward}
 
             print(f"✅ Modèle chargé: {filename}")
             print(f"   ├─ Q-table: {len(agent.q_table)} états connus")
             print(f"   ├─ Episodes entraînés: {agent.episodes_trained}")
             print(f"   ├─ Epsilon actuel: {agent.epsilon:.4f}")
-            print(f"   └─ Meilleur reward: {best_reward}")
+            print(f"   └─ Meilleur reward: {"level :" + str(getattr(env, 'level', 1))}: {agent.best_rewards.get(getattr(env, 'level', 1), float('-inf'))}")
 
             return agent, saved_data
 
@@ -133,14 +156,22 @@ class QLearningAgent:
         """Entraînement avec sauvegarde automatique de la mémoire"""
 
         # Charger le meilleur reward précédent
-        best_reward = float("-inf")
+        reward_buffer = []
+        buffer_size = 50
+        level = getattr(env, "level", 1)
+        best_reward = self.best_rewards.get(level, float("-inf"))
         if os.path.exists(model_filename):
             try:
                 with open(model_filename, "rb") as f:
                     saved_data = np.load(f, allow_pickle=True).item()
-                    best_reward = saved_data.get("best_reward", float("-inf"))
+                    saved_best_reward = saved_data.get("best_reward", float("-inf"))
+                    if isinstance(saved_best_reward, dict):
+                        best_reward = saved_best_reward.get(level, float("-inf"))
+                    else:
+                        best_reward = saved_best_reward
             except (EOFError, ValueError, FileNotFoundError):
-                print(f"⚠️  Fichier de modèle invalide ou corrompu : {model_filename}")
+                print(
+                    f"⚠️  Fichier de modèle invalide ou corrompu : {model_filename}")
 
         print(f"\n{'='*60}")
         print("🎓 DÉBUT DE L'ENTRAÎNEMENT")
@@ -166,6 +197,21 @@ class QLearningAgent:
                 total_reward += reward
                 steps += 1
 
+            # Ajout du reward total de l'épisode au buffer
+            reward_buffer.append(total_reward)
+            if len(reward_buffer) > buffer_size:
+                reward_buffer.pop(0)
+
+            #Décroissance adaptative de l'epsilon
+            if len(reward_buffer) == buffer_size:
+                avg_reward = sum(reward_buffer) / buffer_size
+                if ep > buffer_size and avg_reward > 0:
+                    self.epsilon *= 0.995  # Décroissance plus rapide si la performance est bonne
+                else:
+                    self.decay_epsilon()
+            else:
+                self.decay_epsilon()
+                                
             # MISE À JOUR POST-ÉPISODE
             self.episodes_trained += 1
             self.decay_epsilon()  # Réduire l'exploration progressivement
@@ -182,18 +228,19 @@ class QLearningAgent:
             else:
                 improvement_threshold = 0.05
 
-            if total_reward > best_reward * (1 + improvement_threshold):
+            if done and total_reward > best_reward * (1 + improvement_threshold):
                 best_reward = total_reward
+                self.best_rewards[level] = best_reward
 
             # CHECKPOINT PÉRIODIQUE (toutes les N itérations)
             if (ep + 1) % save_interval == 0:
                 checkpoint_file = f"checkpoints/agent_ep{self.episodes_trained}.npy"
-                self.save(checkpoint_file, best_reward=best_reward)
+                self.save(checkpoint_file, best_reward=self.best_rewards)
 
         # SAUVEGARDE FINALE
         print(f"\n{'='*60}")
         print("💾 Sauvegarde finale...")
-        self.save(model_filename, best_reward=best_reward)
+        self.save(model_filename, best_reward=self.best_rewards)
         print(f"{'='*60}")
 
     def test(self, env, max_steps=200, render=True):
@@ -214,8 +261,10 @@ class QLearningAgent:
             print("-" * 40)
 
         for step in range(max_steps):
-            self.ensure_state(state)
-            action = int(np.argmax(self.q_table[state]))  # Toujours la meilleure action
+            state_key = self.get_full_state(state)
+            self.ensure_state(state_key)
+            # Toujours la meilleure action
+            action = int(np.argmax(self.q_table[state_key]))
             next_state, reward, done, _ = env.step(action)
 
             total_reward += reward
@@ -235,7 +284,7 @@ class QLearningAgent:
         else:
             print(f"\n⏱️  Timeout ({max_steps} étapes max)")
             print(f"   Reward total: {total_reward:.2f}")
-
+         
         # Restaurer epsilon
         self.epsilon = original_epsilon
 
