@@ -89,3 +89,7 @@ Docker (en cours).
 ##### Tests
 
 ```coverage run -m pytest```
+
+##### Lancer l'API du back (pour le front)
+
+```uvicorn api:app --reload --host 127.0.0.1 --port 8000```
