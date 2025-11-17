@@ -10,7 +10,7 @@ class QLearningAgent:
         alpha=0.1,
         gamma=0.95,
         epsilon=1.0,
-        epsilon_min=0.1,
+        epsilon_min=0.01,
         epsilon_decay=0.9995,
     ):
         self.env = env
@@ -202,16 +202,6 @@ class QLearningAgent:
             if len(reward_buffer) > buffer_size:
                 reward_buffer.pop(0)
 
-            #Décroissance adaptative de l'epsilon
-            if len(reward_buffer) == buffer_size:
-                avg_reward = sum(reward_buffer) / buffer_size
-                if ep > buffer_size and avg_reward > 0:
-                    self.epsilon *= 0.995  # Décroissance plus rapide si la performance est bonne
-                else:
-                    self.decay_epsilon()
-            else:
-                self.decay_epsilon()
-                                
             # MISE À JOUR POST-ÉPISODE
             self.episodes_trained += 1
             self.decay_epsilon()  # Réduire l'exploration progressivement
