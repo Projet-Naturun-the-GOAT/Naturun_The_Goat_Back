@@ -73,6 +73,7 @@ class MazeEnv:
         ):
             self.state = next_state
         else:
+            reward = -0.5  # penalty for hitting wall
             next_state = self.state  # invalid move
         
         cell_value = self.maze[next_state]
@@ -95,7 +96,7 @@ class MazeEnv:
                 else:
                     next_state = old_state
                     reward = -5.0
-            elif cell_value == 0:
+            elif cell_value == 0: 
                 self.state = next_state
                 # Bonus exploration si nouvelle case
                 if not hasattr(self, "visited"):
