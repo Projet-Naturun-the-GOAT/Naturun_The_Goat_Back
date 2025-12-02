@@ -182,6 +182,7 @@ class QLearningAgent:
         print(f"Meilleur reward actuel: {best_reward}")
         print(f"{'='*60}\n")
 
+        save_interval = 100
         for ep in range(episodes):
             state = env.reset()
             done = False
