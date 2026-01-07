@@ -56,6 +56,25 @@ def ai_move():
         "steps": env.n_steps,  # Ajout du compteur de pas
     }
 
+    current_state = tuple(env.state)
+
+    old_epsilon = agent.epsilon
+    agent.epsilon = 0
+    action_idx = agent.choose_action(current_state)
+    agent.epsilon = old_epsilon
+
+    next_state, reward, done, info = env.step(action_idx)
+
+    action_map_inv = {0: "up", 1: "down", 2: "left", 3: "right"}
+
+    return {
+        "agent": list(env.state),
+        "action": action_map_inv[action_idx],
+        "done": done,
+        "reward": reward,
+        "steps": env.n_steps,  # Ajout du compteur de pas
+    }
+
 
 @app.post("/reset")
 def reset_agent():
