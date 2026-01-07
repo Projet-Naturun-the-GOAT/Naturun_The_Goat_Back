@@ -29,22 +29,35 @@ class MoveRequest(BaseModel):
 @app.get("/maze")
 def get_maze():
     return {
-        "maze": env.maze.tolist(),  # convertir numpy array en liste
-        "agent": list(env.state),  # convertir tuple en liste pour JSON
+        "maze": env.maze.tolist(),
+        "agent": list(env.state),
     }
 
 
-@app.post("/step")
-def move_agent(req: MoveRequest):
-    action_map = {"up": 0, "down": 1, "left": 2, "right": 3}
-    if req.action not in action_map:
-        return {"error": "Invalid action"}
+@app.post("/ai-step")
+def ai_move():
 
-    next_state, reward, done, info = env.step(action_map[req.action])
-    return {"agent": list(env.state), "reward": reward, "done": done}
+    current_state = tuple(env.state)
+
+    old_epsilon = agent.epsilon
+    agent.epsilon = 0
+    action_idx = agent.choose_action(current_state)
+    agent.epsilon = old_epsilon
+
+    next_state, reward, done, info = env.step(action_idx)
+
+    action_map_inv = {0: "up", 1: "down", 2: "left", 3: "right"}
+
+    return {
+        "agent": list(env.state),
+        "action": action_map_inv[action_idx],
+        "done": done,
+        "reward": reward,
+        "steps": env.n_steps,  # Ajout du compteur de pas
+    }
 
 
 @app.post("/reset")
 def reset_agent():
     env.reset()
-    return {"agent": list(env.state)}
+    return {"agent": list(env.state), "steps": 0}
