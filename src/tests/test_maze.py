@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.environment.maze import MazeEnv
+from src.environment.maze import MazeEnv, generate_maze
 
 REWARD_GOAL = 20.0
 REWARD_WALL = -0.5
@@ -147,3 +147,121 @@ def test_render(setup_maze):
         env.render()  # Just check that this doesn't raise an exception
     except Exception as e:
         pytest.fail(f"La méthode render a levé une exception: {e}")
+
+
+def test_backtrack_penalty(setup_maze):
+    """Test de la pénalité d'aller-retour immédiat."""
+    env = setup_maze
+    env.start = (2, 0)
+    env.reset()
+    env.step(3)  # right to (2,1)
+    _, reward, _, _ = env.step(2)  # left back to (2,0)
+    assert reward <= REWARD_MOVE - 1.0, "L'aller-retour devrait appliquer une pénalité."
+
+
+def test_level_2_key_pickup():
+    """Test de la récupération de la clé au niveau 2."""
+    maze = np.array(
+        [
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ]
+    )
+    start = (1, 2)
+    goal = (2, 4)
+    env = MazeEnv(maze, start, goal, level=2)
+    env.reset()
+    # key_position is (1, width-2) -> (1,3)
+    state, reward, done, info = env.step(3)  # right to key
+    assert state == (1, 3)
+    assert reward == pytest.approx(15.0)
+    assert env.has_key is True
+    assert done is False
+
+
+def test_level_2_door_without_key_blocks():
+    """Test qu'une porte bloque sans clé au niveau 2."""
+    maze = np.array(
+        [
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ]
+    )
+    start = (0, 2)
+    goal = (1, 1)
+    env = MazeEnv(maze, start, goal, level=2)
+    env.reset()
+    # Door is at (1,2) around the goal
+    state, reward, done, info = env.step(1)  # down into door
+    assert state == start
+    assert reward == pytest.approx(-5.0)
+    assert env.has_key is False
+    assert done is False
+
+
+def test_level_2_door_with_key_opens():
+    """Test qu'une porte s'ouvre avec la clé au niveau 2."""
+    maze = np.array(
+        [
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ]
+    )
+    start = (0, 2)
+    goal = (1, 1)
+    env = MazeEnv(maze, start, goal, level=2)
+    env.reset()
+    env.has_key = True
+    state, reward, done, info = env.step(1)  # down into door
+    assert state == (1, 2)
+    assert reward == pytest.approx(8.0)
+    assert env.has_key is True
+
+
+def test_level_2_reach_goal_after_opening():
+    """Test de la réussite au niveau 2 une fois le chemin libre."""
+    maze = np.array(
+        [
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ]
+    )
+    start = (1, 1)
+    goal = (1, 2)
+    env = MazeEnv(maze, start, goal, level=2)
+    env.reset()
+    env.has_key = True
+    env.maze[goal] = 0
+    state, reward, done, info = env.step(3)
+    assert state == goal
+    assert bool(done) is True
+    assert reward == pytest.approx(REWARD_GOAL)
+
+
+def test_render_level_2():
+    """Test de la méthode render pour le niveau 2."""
+    maze = np.array(
+        [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+        ]
+    )
+    env = MazeEnv(maze, start=(0, 0), goal=(2, 2), level=2)
+    env.reset()
+    try:
+        env.render()
+    except Exception as e:
+        pytest.fail(f"La méthode render (niveau 2) a levé une exception: {e}")
+
+
+def test_generate_maze_shape_and_values():
+    """Test de la génération aléatoire du labyrinthe."""
+    maze = generate_maze(width=9, height=7)
+    assert maze.shape == (7, 9)
+    assert maze[1, 1] == 0
+    assert np.all(np.isin(maze, [0, 1]))

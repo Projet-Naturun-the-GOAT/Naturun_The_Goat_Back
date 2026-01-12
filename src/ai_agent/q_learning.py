@@ -27,15 +27,19 @@ class QLearningAgent:
 
     def get_full_state(self, state):
         # Pour le niveau 2, inclure la clé dans l'état
-        if hasattr(self.env, "level") and self.env.level == 2 and hasattr(self.env, "has_key"):
+        if (
+            hasattr(self.env, "level")
+            and self.env.level == 2
+            and hasattr(self.env, "has_key")
+        ):
             return (state[0], state[1], self.env.has_key)
         return state
-    
+
     def ensure_state(self, state):
         state = self.get_full_state(state)
         if state not in self.q_table:
             self.q_table[state] = np.zeros(self.action_size)
-            
+
     def choose_action(self, state):
         state = self.get_full_state(state)
         self.ensure_state(state)
@@ -120,10 +124,8 @@ class QLearningAgent:
                 agent.alpha = params.get("alpha", agent.alpha)
                 agent.gamma = params.get("gamma", agent.gamma)
                 agent.epsilon = params.get("epsilon", agent.epsilon)
-                agent.epsilon_min = params.get(
-                    "epsilon_min", agent.epsilon_min)
-                agent.epsilon_decay = params.get(
-                    "epsilon_decay", agent.epsilon_decay)
+                agent.epsilon_min = params.get("epsilon_min", agent.epsilon_min)
+                agent.epsilon_decay = params.get("epsilon_decay", agent.epsilon_decay)
 
             saved_best_reward = saved_data.get("best_reward", float("-inf"))
             if isinstance(saved_best_reward, dict):
@@ -135,7 +137,9 @@ class QLearningAgent:
             print(f"   ├─ Q-table: {len(agent.q_table)} états connus")
             print(f"   ├─ Episodes entraînés: {agent.episodes_trained}")
             print(f"   ├─ Epsilon actuel: {agent.epsilon:.4f}")
-            print(f"   └─ Meilleur reward: {"level :" + str(getattr(env, 'level', 1))}: {agent.best_rewards.get(getattr(env, 'level', 1), float('-inf'))}")
+            level = getattr(env, "level", 1)
+            best_reward = agent.best_rewards.get(level, float("-inf"))
+            print(f"   └─ Meilleur reward: level {level}: {best_reward}")
 
             return agent, saved_data
 
@@ -170,8 +174,7 @@ class QLearningAgent:
                     else:
                         best_reward = saved_best_reward
             except (EOFError, ValueError, FileNotFoundError):
-                print(
-                    f"⚠️  Fichier de modèle invalide ou corrompu : {model_filename}")
+                print(f"⚠️  Fichier de modèle invalide ou corrompu : {model_filename}")
 
         print(f"\n{'='*60}")
         print("🎓 DÉBUT DE L'ENTRAÎNEMENT")
