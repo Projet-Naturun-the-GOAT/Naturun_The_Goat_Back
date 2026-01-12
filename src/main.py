@@ -5,11 +5,13 @@ from src.ai_agent.q_learning import QLearningAgent
 from src.environment.maze import MazeEnv, generate_maze
 
 
-def init_environment(width=23, height=23, seed=42):
+def init_environment(width=31, height=31, seed=42):
     """Crée un environnement MazeEnv reproductible."""
-    random.seed(seed)
+    if seed is not None:
+        random.seed(seed)
     maze = generate_maze(width, height)
-    random.seed()  # reset global RNG
+    if seed is not None:
+        random.seed()  # reset global RNG
     return MazeEnv(maze, start=(1, 1), goal=(height - 2, width - 2))
 
 
@@ -86,7 +88,7 @@ def main(
                 agent = QLearningAgent(env)
                 agent.train(
                     env,
-                    episodes=episodes,
+                    episodes=100,
                     max_steps=max_steps,
                     model_filename=model_file,
                 )

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -25,12 +27,20 @@ class MoveRequest(BaseModel):
     action: str  # "up", "down", "left", "right"
 
 
+class MazeConfigRequest(BaseModel):
+    width: int = 49
+    height: int = 49
+    seed: Optional[int] = 42
+
+
 # === ROUTES ===
 @app.get("/maze")
 def get_maze():
     return {
         "maze": env.maze.tolist(),
         "agent": list(env.state),
+        "width": env.maze.shape[1],
+        "height": env.maze.shape[0],
     }
 
 
@@ -80,3 +90,16 @@ def ai_move():
 def reset_agent():
     env.reset()
     return {"agent": list(env.state), "steps": 0}
+
+
+@app.post("/configure")
+def configure_maze(config: MazeConfigRequest):
+    global env, agent
+    env = init_environment(width=config.width, height=config.height, seed=config.seed)
+    agent, _ = load_or_create_agent("agent_model.npy", env)
+    return {
+        "maze": env.maze.tolist(),
+        "agent": list(env.state),
+        "width": env.maze.shape[1],
+        "height": env.maze.shape[0],
+    }
