@@ -100,8 +100,23 @@ def reset_agent():
     return {"agent": list(env.state), "steps": 0}
 
 
-@app.post("/reset-memory")
-def reset_memory():
+@app.post("/configure")
+def configure_maze(config: MazeConfigRequest):
+    global env, agent
+    env = init_environment(width=config.width, height=config.height, seed=config.seed)
+    agent = QLearningAgent(env)
+    env.reset()
+    return {
+        "maze": env.maze.tolist(),
+        "agent": list(env.state),
+        "width": env.maze.shape[1],
+        "height": env.maze.shape[0],
+        "steps": 0,
+    }
+
+
+@app.delete("/memory")
+def delete_memory():
     global agent
     model_file = "agent_model.npy"
     if os.path.exists(model_file):
@@ -116,27 +131,6 @@ def reset_memory():
         "steps": 0,
         "episodes_trained": agent.episodes_trained,
         "epsilon": agent.epsilon,
-    }
-
-
-@app.post("/configure")
-def configure_maze(config: MazeConfigRequest):
-    global env, agent
-    model_file = "agent_model.npy"
-    if os.path.exists(model_file):
-        try:
-            os.remove(model_file)
-        except OSError:
-            pass
-    env = init_environment(width=config.width, height=config.height, seed=config.seed)
-    agent = QLearningAgent(env)
-    env.reset()
-    return {
-        "maze": env.maze.tolist(),
-        "agent": list(env.state),
-        "width": env.maze.shape[1],
-        "height": env.maze.shape[0],
-        "steps": 0,
     }
 
 
