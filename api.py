@@ -122,16 +122,21 @@ def reset_memory():
 @app.post("/configure")
 def configure_maze(config: MazeConfigRequest):
     global env, agent
+    model_file = "agent_model.npy"
+    if os.path.exists(model_file):
+        try:
+            os.remove(model_file)
+        except OSError:
+            pass
     env = init_environment(width=config.width, height=config.height, seed=config.seed)
-    agent, _ = load_or_create_agent("agent_model.npy", env)
-    agent.episodes_trained = 0
+    agent = QLearningAgent(env)
     env.reset()
     return {
         "maze": env.maze.tolist(),
         "agent": list(env.state),
         "width": env.maze.shape[1],
         "height": env.maze.shape[0],
-        "steps": env.n_steps,
+        "steps": 0,
     }
 
 
