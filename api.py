@@ -1,9 +1,11 @@
+import os
 from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from src.ai_agent.q_learning import QLearningAgent
 from src.main import init_environment, load_or_create_agent
 
 # === CONFIG CORS ===
@@ -31,6 +33,12 @@ class MazeConfigRequest(BaseModel):
     width: int = 49
     height: int = 49
     seed: Optional[int] = 42
+
+
+class TrainRequest(BaseModel):
+    episodes: int = 100
+    max_steps: int = 200
+    model_file: str = "agent_model.npy"
 
 
 # === ROUTES ===
@@ -92,14 +100,54 @@ def reset_agent():
     return {"agent": list(env.state), "steps": 0}
 
 
+@app.post("/reset-memory")
+def reset_memory():
+    global agent
+    model_file = "agent_model.npy"
+    if os.path.exists(model_file):
+        try:
+            os.remove(model_file)
+        except OSError:
+            pass
+    agent = QLearningAgent(env)
+    env.reset()
+    return {
+        "agent": list(env.state),
+        "steps": 0,
+        "episodes_trained": agent.episodes_trained,
+        "epsilon": agent.epsilon,
+    }
+
+
 @app.post("/configure")
 def configure_maze(config: MazeConfigRequest):
     global env, agent
     env = init_environment(width=config.width, height=config.height, seed=config.seed)
     agent, _ = load_or_create_agent("agent_model.npy", env)
+    agent.episodes_trained = 0
+    env.reset()
     return {
         "maze": env.maze.tolist(),
         "agent": list(env.state),
         "width": env.maze.shape[1],
         "height": env.maze.shape[0],
+        "steps": env.n_steps,
+    }
+
+
+@app.post("/train")
+def train_agent(payload: TrainRequest):
+    global env, agent
+    agent.train(
+        env,
+        episodes=payload.episodes,
+        max_steps=payload.max_steps,
+        model_filename=payload.model_file,
+    )
+    env.reset()
+    return {
+        "episodes_trained": agent.episodes_trained,
+        "epsilon": agent.epsilon,
+        "agent": list(env.state),
+        "steps": 0,
     }

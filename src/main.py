@@ -1,11 +1,12 @@
 import os
 import random
+from typing import Optional
 
 from src.ai_agent.q_learning import QLearningAgent
 from src.environment.maze import MazeEnv, generate_maze
 
 
-def init_environment(width=31, height=31, seed=42):
+def init_environment(width=31, height=31, seed: Optional[int] = 42):
     """Crée un environnement MazeEnv reproductible."""
     if seed is not None:
         random.seed(seed)
