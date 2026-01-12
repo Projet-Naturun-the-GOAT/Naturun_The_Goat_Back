@@ -76,7 +76,7 @@ class MazeEnv:
         print("\n".join(" ".join(row) for row in maze_render))
 
 
-def generate_maze(width=31, height=31):
+def generate_maze(width=23, height=23):
     """Génère un labyrinthe aléatoire avec l'algorithme de backtracking récursif"""
     maze = np.ones((height, width), dtype=int)
 
